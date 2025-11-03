@@ -9,7 +9,7 @@ services:
       ANKI_DESKTOP_URL: '${ANKI_DESKTOP_URL}'
       BASIC_AUTH_CREDENTIALS: '${BASIC_AUTH_CREDENTIALS}'
     volumes:
-      - anki-data:/config
+      - ./anki_data:/config
     restart: unless-stopped
     healthcheck:
       test:
@@ -53,10 +53,6 @@ services:
       - traefik.http.services.ankiconnect.loadbalancer.server.port=8765
     networks:
       - coolify
-
-volumes:
-  anki-data:
-    name: anki-data
 
 networks:
   coolify:
