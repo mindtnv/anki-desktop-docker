@@ -6,8 +6,7 @@ services:
     environment:
       PUID: '${PUID:-1000}'
       PGID: '${PGID:-1000}'
-      SERVICE_FQDN_ANKI_DESKTOP: '${SERVICE_FQDN_ANKI_DESKTOP}'
-      SERVICE_URL_ANKI_DESKTOP: '${SERVICE_URL_ANKI_DESKTOP}'
+      ANKI_DESKTOP_URL: '${SERVICE_FQDN_ANKI_DESKTOP}'
       BASIC_AUTH_CREDENTIALS: '${BASIC_AUTH_CREDENTIALS}'
     volumes:
       - anki-data:/config
