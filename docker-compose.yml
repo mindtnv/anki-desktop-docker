@@ -24,68 +24,42 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-    container_name: '${COOLIFY_CONTAINER_NAME}'
+    container_name: anki-desktop
     labels:
-      # Coolify metadata
-      - coolify.managed=true
-      - coolify.version=${COOLIFY_VERSION}
-      - coolify.applicationId=${COOLIFY_APPLICATION_ID}
-      - coolify.type=application
-      - coolify.name=${COOLIFY_CONTAINER_NAME}
-      - coolify.resourceName=${COOLIFY_RESOURCE_NAME}
-      - coolify.projectName=${COOLIFY_PROJECT_NAME}
-      - coolify.serviceName=${COOLIFY_SERVICE_NAME}
-      - coolify.environmentName=${COOLIFY_ENVIRONMENT_NAME}
-      - coolify.pullRequestId=${COOLIFY_PULL_REQUEST_ID:-0}
-
-      # Traefik configuration
       - traefik.enable=true
       - traefik.http.middlewares.gzip.compress=true
       - traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https
+      - traefik.http.middlewares.anki-auth.basicauth.users=${BASIC_AUTH_CREDENTIALS}
 
-      # Basic Auth middleware for Web UI
-      # To enable: set BASIC_AUTH_CREDENTIALS and uncomment the line below in middlewares chain
-      - traefik.http.middlewares.anki-auth-${COOLIFY_RESOURCE_UUID}.basicauth.users=${BASIC_AUTH_CREDENTIALS}
+      - traefik.http.routers.http-0-anki-desktop.entryPoints=http
+      - traefik.http.routers.http-0-anki-desktop.middlewares=redirect-to-https
+      - 'traefik.http.routers.http-0-anki-desktop.rule=Host(`${SERVICE_FQDN_ANKI_DESKTOP}`) && PathPrefix(`/`)'
 
-      # HTTP to HTTPS redirect
-      - traefik.http.routers.http-0-${COOLIFY_RESOURCE_UUID}-anki-desktop.entryPoints=http
-      - traefik.http.routers.http-0-${COOLIFY_RESOURCE_UUID}-anki-desktop.middlewares=redirect-to-https
-      - 'traefik.http.routers.http-0-${COOLIFY_RESOURCE_UUID}-anki-desktop.rule=Host(`${SERVICE_FQDN_ANKI_DESKTOP}`) && PathPrefix(`/`)'
+      - traefik.http.routers.https-0-anki-desktop.entryPoints=https
+      - traefik.http.routers.https-0-anki-desktop.middlewares=gzip,anki-auth
+      - 'traefik.http.routers.https-0-anki-desktop.rule=Host(`${SERVICE_FQDN_ANKI_DESKTOP}`)'
+      - traefik.http.routers.https-0-anki-desktop.tls.certresolver=letsencrypt
+      - traefik.http.routers.https-0-anki-desktop.tls=true
+      - traefik.http.routers.https-0-anki-desktop.service=anki-web
+      - traefik.http.services.anki-web.loadbalancer.server.port=3000
 
-      # HTTPS router for Web UI (port 3000)
-      - traefik.http.routers.https-0-${COOLIFY_RESOURCE_UUID}-anki-desktop.entryPoints=https
-      # Middlewares: uncomment the line with Basic Auth to enable authentication
-      - traefik.http.routers.https-0-${COOLIFY_RESOURCE_UUID}-anki-desktop.middlewares=gzip,anki-auth-${COOLIFY_RESOURCE_UUID}
-      # - traefik.http.routers.https-0-${COOLIFY_RESOURCE_UUID}-anki-desktop.middlewares=gzip
-      - 'traefik.http.routers.https-0-${COOLIFY_RESOURCE_UUID}-anki-desktop.rule=Host(`${SERVICE_FQDN_ANKI_DESKTOP}`)'
-      - traefik.http.routers.https-0-${COOLIFY_RESOURCE_UUID}-anki-desktop.tls.certresolver=letsencrypt
-      - traefik.http.routers.https-0-${COOLIFY_RESOURCE_UUID}-anki-desktop.tls=true
-      - traefik.http.routers.https-0-${COOLIFY_RESOURCE_UUID}-anki-desktop.service=anki-web-${COOLIFY_RESOURCE_UUID}
-      - traefik.http.services.anki-web-${COOLIFY_RESOURCE_UUID}.loadbalancer.server.port=3000
-
-      # AnkiConnect API on subdomain api.${SERVICE_FQDN_ANKI_DESKTOP} (port 8765)
-      # By default enabled. To disable, comment out the following lines:
-      - traefik.http.routers.http-1-${COOLIFY_RESOURCE_UUID}-ankiconnect.entryPoints=http
-      - traefik.http.routers.http-1-${COOLIFY_RESOURCE_UUID}-ankiconnect.middlewares=redirect-to-https
-      - 'traefik.http.routers.http-1-${COOLIFY_RESOURCE_UUID}-ankiconnect.rule=Host(`api.${SERVICE_FQDN_ANKI_DESKTOP}`)'
-      - traefik.http.routers.https-1-${COOLIFY_RESOURCE_UUID}-ankiconnect.entryPoints=https
-      - 'traefik.http.routers.https-1-${COOLIFY_RESOURCE_UUID}-ankiconnect.rule=Host(`api.${SERVICE_FQDN_ANKI_DESKTOP}`)'
-      - traefik.http.routers.https-1-${COOLIFY_RESOURCE_UUID}-ankiconnect.tls.certresolver=letsencrypt
-      - traefik.http.routers.https-1-${COOLIFY_RESOURCE_UUID}-ankiconnect.tls=true
-      - traefik.http.routers.https-1-${COOLIFY_RESOURCE_UUID}-ankiconnect.service=ankiconnect-${COOLIFY_RESOURCE_UUID}
-      - traefik.http.services.ankiconnect-${COOLIFY_RESOURCE_UUID}.loadbalancer.server.port=8765
+      - traefik.http.routers.http-1-ankiconnect.entryPoints=http
+      - traefik.http.routers.http-1-ankiconnect.middlewares=redirect-to-https
+      - 'traefik.http.routers.http-1-ankiconnect.rule=Host(`api.${SERVICE_FQDN_ANKI_DESKTOP}`)'
+      - traefik.http.routers.https-1-ankiconnect.entryPoints=https
+      - 'traefik.http.routers.https-1-ankiconnect.rule=Host(`api.${SERVICE_FQDN_ANKI_DESKTOP}`)'
+      - traefik.http.routers.https-1-ankiconnect.tls.certresolver=letsencrypt
+      - traefik.http.routers.https-1-ankiconnect.tls=true
+      - traefik.http.routers.https-1-ankiconnect.service=ankiconnect
+      - traefik.http.services.ankiconnect.loadbalancer.server.port=8765
     networks:
-      - ${COOLIFY_RESOURCE_UUID}
       - coolify
 
 volumes:
   anki-data:
-    name: anki-data-${COOLIFY_RESOURCE_UUID}
+    name: anki-data
 
 networks:
-  ${COOLIFY_RESOURCE_UUID}:
-    name: ${COOLIFY_RESOURCE_UUID}
-    external: true
   coolify:
     name: coolify
     external: true
