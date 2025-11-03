@@ -29,11 +29,14 @@ services:
       - traefik.http.middlewares.gzip.compress=true
       - traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https
       - traefik.http.middlewares.anki-auth.basicauth.users=${BASIC_AUTH_CREDENTIALS}
-
-      #- traefik.http.routers.http-0-anki-desktop.entryPoints=http
-      #- traefik.http.routers.http-0-anki-desktop.middlewares=redirect-to-https
-      #- 'traefik.http.routers.http-0-anki-desktop.rule=Host(`${ANKI_DESKTOP_URL}`) && PathPrefix(`/`)'
-
+    
+      # HTTP router for anki-desktop (redirects to HTTPS)
+      - traefik.http.routers.http-0-anki-desktop.entryPoints=http
+      - traefik.http.routers.http-0-anki-desktop.middlewares=redirect-to-https
+      - 'traefik.http.routers.http-0-anki-desktop.rule=Host(`${ANKI_DESKTOP_URL}`)'
+      - traefik.http.routers.http-0-anki-desktop.service=anki-web
+    
+      # HTTPS router for anki-desktop
       - traefik.http.routers.https-0-anki-desktop.entryPoints=https
       - traefik.http.routers.https-0-anki-desktop.middlewares=gzip,anki-auth
       - 'traefik.http.routers.https-0-anki-desktop.rule=Host(`${ANKI_DESKTOP_URL}`)'
@@ -41,10 +44,14 @@ services:
       - traefik.http.routers.https-0-anki-desktop.tls=true
       - traefik.http.routers.https-0-anki-desktop.service=anki-web
       - traefik.http.services.anki-web.loadbalancer.server.port=3000
-
-      #- traefik.http.routers.http-1-ankiconnect.entryPoints=http
-      #- traefik.http.routers.http-1-ankiconnect.middlewares=redirect-to-https
-      #- 'traefik.http.routers.http-1-ankiconnect.rule=Host(`api.${ANKI_DESKTOP_URL}`)'
+    
+      # HTTP router for ankiconnect (redirects to HTTPS)
+      - traefik.http.routers.http-1-ankiconnect.entryPoints=http
+      - traefik.http.routers.http-1-ankiconnect.middlewares=redirect-to-https
+      - 'traefik.http.routers.http-1-ankiconnect.rule=Host(`api.${ANKI_DESKTOP_URL}`)'
+      - traefik.http.routers.http-1-ankiconnect.service=ankiconnect
+    
+      # HTTPS router for ankiconnect
       - traefik.http.routers.https-1-ankiconnect.entryPoints=https
       - 'traefik.http.routers.https-1-ankiconnect.rule=Host(`api.${ANKI_DESKTOP_URL}`)'
       - traefik.http.routers.https-1-ankiconnect.tls.certresolver=letsencrypt
