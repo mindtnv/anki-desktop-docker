@@ -5,23 +5,8 @@ services:
     environment:
       PUID: '${PUID:-1000}'
       PGID: '${PGID:-1000}'
-      # CJK font support (uncomment if needed)
-      # DOCKER_MODS: linuxserver/mods:universal-package-install
-      # INSTALL_PACKAGES: language-pack-zh-hans|fonts-arphic-ukai|fonts-arphic-uming|fonts-ipafont-mincho|fonts-ipafont-gothic|fonts-unfonts-core
-
-      # Coolify variables
-      COOLIFY_BRANCH: '${COOLIFY_BRANCH}'
-      COOLIFY_RESOURCE_UUID: '${COOLIFY_RESOURCE_UUID}'
-      COOLIFY_CONTAINER_NAME: '${COOLIFY_CONTAINER_NAME}'
       SERVICE_FQDN_ANKI_DESKTOP: '${SERVICE_FQDN_ANKI_DESKTOP}'
       SERVICE_URL_ANKI_DESKTOP: '${SERVICE_URL_ANKI_DESKTOP}'
-      COOLIFY_URL: '${COOLIFY_URL}'
-      COOLIFY_FQDN: '${COOLIFY_FQDN}'
-
-      # Basic Auth credentials (optional)
-      # Format: username:$$apr1$$hashedpassword
-      # Generate with: htpasswd -nb username password
-      # Or online: https://hostingcanada.org/htpasswd-generator/
       BASIC_AUTH_CREDENTIALS: '${BASIC_AUTH_CREDENTIALS}'
     volumes:
       - anki-data:/config
