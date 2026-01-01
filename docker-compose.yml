@@ -53,6 +53,7 @@ services:
     
       # HTTPS router for ankiconnect
       - traefik.http.routers.https-1-ankiconnect.entryPoints=https
+      - traefik.http.routers.https-1-ankiconnect.middlewares=anki-auth
       - 'traefik.http.routers.https-1-ankiconnect.rule=Host(`api.${ANKI_DESKTOP_URL}`)'
       - traefik.http.routers.https-1-ankiconnect.tls.certresolver=letsencrypt
       - traefik.http.routers.https-1-ankiconnect.tls=true
